@@ -28,11 +28,11 @@ A própria aplicação usa a stack que está sendo estudada: tudo roda em contai
 
 | # | Certificação | Nome | Foco |
 |---|---|---|---|
-| 1 | **KCNA** | Kubernetes and Cloud Native Associate | Fundamentos cloud native |
-| 2 | **KCSA** | Kubernetes and Cloud Native Security Associate | Fundamentos de segurança |
-| 3 | **CKAD** | Certified Kubernetes Application Developer | Desenvolvimento de aplicações |
-| 4 | **CKA** | Certified Kubernetes Administrator | Administração de cluster |
-| 5 | **CKS** | Certified Kubernetes Security Specialist | Segurança avançada |
+| 1 | [**KCNA**](certs/kcna) | Kubernetes and Cloud Native Associate | Fundamentos cloud native |
+| 2 | [**KCSA**](certs/kcsa) | Kubernetes and Cloud Native Security Associate | Fundamentos de segurança |
+| 3 | [**CKAD**](certs/ckad) | Certified Kubernetes Application Developer | Desenvolvimento de aplicações |
+| 4 | [**CKA**](certs/cka) | Certified Kubernetes Administrator | Administração de cluster |
+| 5 | [**CKS**](certs/cks) | Certified Kubernetes Security Specialist | Segurança avançada |
 
 ```
 [KCNA] ──▶ [KCSA] ──▶ [CKAD] ──▶ [CKA] ──▶ [CKS] ──▶ 🚀 KUBESTRONAUT
@@ -82,7 +82,12 @@ A própria aplicação usa a stack que está sendo estudada: tudo roda em contai
 
 ```text
 studies-cert-kubestronaut/
-├── kcna/ kcsa/ ckad/ cka/ cks/  # Guia de cada certificação: formato da prova, domínios e recursos
+├── certs/                       # Guia de cada certificação: formato da prova, domínios e recursos
+│   ├── kcna/
+│   ├── kcsa/
+│   ├── ckad/
+│   ├── cka/
+│   └── cks/
 ├── mission-control/
 │   ├── frontend/                # Next.js 15 (web)
 │   ├── backend/                 # FastAPI (api)
@@ -103,7 +108,7 @@ studies-cert-kubestronaut/
 3. O web (Next.js) monta o painel, a constelação 3D e as telas de cronograma, pomodoro e stats.
 4. O web consome a API (FastAPI), que acessa o PostgreSQL via asyncpg e o Redis como cache.
 5. Cada sessão de estudo registrada alimenta o progresso das certificações e as estatísticas.
-6. O material de cada certificação fica na pasta dela, seguindo a ordem do roadmap.
+6. O material de cada certificação fica em `certs/<certificação>/`, seguindo a ordem do roadmap.
 
 ## Como rodar
 
