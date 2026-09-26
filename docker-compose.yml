@@ -1,0 +1,20 @@
+# Kubestronaut — orquestração geral
+#
+# Este arquivo apenas inclui o docker-compose do Mission Control.
+# É o ponto de entrada único pra subir TUDO de uma vez:
+#
+#   docker compose up -d              # sobe tudo
+#   docker compose ps                 # vê containers
+#   docker compose logs -f web        # logs do frontend
+#   docker compose logs -f api        # logs do backend
+#   docker compose down               # para tudo
+#   docker compose down -v            # para tudo + apaga volumes
+#
+# Acesso (depois de subir):
+#   Frontend         → http://localhost:3000
+#   API (FastAPI)    → http://localhost:8000   (docs em /docs)
+#   Postgres         → localhost:5432  (user: mission · pass: mission_dev)
+#   Redis            → localhost:6379
+
+include:
+  - mission-control/docker-compose.yml

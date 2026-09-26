@@ -1,0 +1,31 @@
+# Segredos
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Volumes/dumps
+*.sqlite
+*.dump
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+*.Zone.Identifier
+
+# IDE
+.vscode/
+.idea/
+
+# Build artifacts
+node_modules/
+.next/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
