@@ -38,7 +38,6 @@ mission-control/
 │   ├── next.config.mjs
 │   ├── tailwind.config.ts
 │   └── tsconfig.json
-└── screenshots/                         # evidências do design
 ```
 
 ## Rodar localmente
