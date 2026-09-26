@@ -1,0 +1,137 @@
+# Mission Control — orquestração local
+#
+# Subir tudo:           docker compose up -d
+# Logs de um serviço:   docker compose logs -f api
+# Reset total:          docker compose down -v
+#
+# Acesso:
+#   Frontend:  http://localhost:3000
+#   API:       http://localhost:8000   (docs em /docs)
+#   Postgres:  localhost:5432 (mission / mission_dev)
+#   Redis:     localhost:6379
+#
+# Existe um docker-compose.yml na RAIZ do repo que dá `include` neste
+# aqui — então rodar a partir da raiz também funciona.
+
+name: mission-control
+
+networks:
+  edge:
+    driver: bridge
+  internal:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+
+services:
+  # ─── REVERSE PROXY ──────────────────────────────────────────────
+  traefik:
+    image: traefik:v3.0
+    container_name: mc-traefik
+    restart: unless-stopped
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --api.dashboard=true
+      - --api.insecure=true   # ⚠️ apenas local, desligar em prod
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"   # dashboard Traefik (local)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [edge, internal]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dash.rule=Host(`traefik.mission.local`)
+      - traefik.http.routers.dash.service=api@internal
+
+  # ─── FRONTEND (Next.js) ─────────────────────────────────────────
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mc-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"   # acesso direto pra dev local
+    environment:
+      # NEXT_PUBLIC_* é lido no build do browser — aponta pro host
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      - api
+    networks: [edge]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.web.rule=Host(`mission.local`)
+      - traefik.http.services.web.loadbalancer.server.port=3000
+
+  # ─── BANCO DE DADOS ─────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: mc-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mission}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mission_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-mission}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mission}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─── CACHE / TIMER STATE ────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: mc-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─── BACKEND API (FastAPI) ──────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mc-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-mission}:${POSTGRES_PASSWORD:-mission_dev}@db:5432/${POSTGRES_DB:-mission}
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:-change-me-please}
+      ENV: ${ENV:-dev}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [edge, internal]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`api.mission.local`)
+      - traefik.http.services.api.loadbalancer.server.port=8000
+
+  # Observabilidade (Prometheus + Grafana) entra na V3 — ver PLAN.md.
