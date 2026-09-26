@@ -81,17 +81,14 @@ A própria aplicação usa a stack que está sendo estudada: tudo roda em contai
 ## Estrutura do repositório
 
 ```text
-kubestronaut/
+studies-cert-kubestronaut/
 ├── kcna/ kcsa/ ckad/ cka/ cks/  # Guia de cada certificação: formato da prova, domínios e recursos
-├── labs/                        # Práticas e simulados
-├── linux-tips/                  # Anotações de Linux
 ├── mission-control/
 │   ├── frontend/                # Next.js 15 (web)
 │   ├── backend/                 # FastAPI (api)
 │   ├── db/init/                 # Seed do PostgreSQL
 │   ├── docker-compose.yml       # Traefik, web, api, db e redis
-│   ├── PLAN.md                  # Plano completo do sistema
-│   └── screenshots/             # Telas do sistema
+│   └── PLAN.md                  # Plano completo do sistema
 ├── docs/
 │   ├── demo.webp                # Demonstração do Mission Control
 │   └── arch.gif                 # Diagrama da arquitetura
